@@ -1,19 +1,17 @@
 #include "EnvimetReader.h"
 
-#include "vtkObjectFactory.h"
-#include "vtkStreamingDemandDrivenPipeline.h"
-#include "vtkInformationVector.h"
-#include "vtkInformation.h"
-#include "vtkDataObject.h"
-#include "vtkSmartPointer.h"
-#include "vtkPointData.h"
+#include <vtkObjectFactory.h>
+#include <vtkStreamingDemandDrivenPipeline.h>
+#include <vtkInformationVector.h>
+#include <vtkInformation.h>
+#include <vtkSmartPointer.h>
+#include <vtkPointData.h>
 #include <vtkDataArray.h>
+#include <vtkFloatArray.h>
 
 #include <iostream>
-#include <sstream>
 #include <fstream>
 #include <string>
-#include <vtkFloatArray.h>
 
 vtkStandardNewMacro(EnvimetReader);
 
@@ -37,15 +35,8 @@ int EnvimetReader::RequestInformation(
 		return -1;
 	}
 
-	std::ifstream in (this->FileName, std::ios::in);
-	if(!in.is_open())
-	{
-		vtkErrorMacro(<< "File " << this->FileName << " not found");
-		return -1;
-	}
-
 	vtkDebugMacro (<< "reading seismic header");
-	// TODO:
+	// TODO: read this info from EDI file
 	x_spacing = 5;
 	y_spacing = 5;
 
@@ -71,15 +62,14 @@ int EnvimetReader::RequestData(
 	vtkInformation *outInfo = outputVector->GetInformationObject(0);
 	vtkDataObject::SetPointDataActiveScalarInfo(outInfo, VTK_FLOAT, 1);
 
-	// get the ouptut
 	vtkRectilinearGrid *output = vtkRectilinearGrid::SafeDownCast(
 		outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
 	output->SetExtent(
 		outInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT()));
 
+	// Points
 	output->SetDimensions(x_dim, y_dim, z_dim);
-
 	vtkFloatArray *xCoords = vtkFloatArray::New();
 	for(int i = 0; i < x_dim; i++) xCoords->InsertNextValue(i*x_spacing);
 	vtkFloatArray *yCoords = vtkFloatArray::New();
@@ -99,6 +89,94 @@ int EnvimetReader::RequestData(
 	output->SetXCoordinates(xCoords);
 	output->SetYCoordinates(yCoords);
 	output->SetZCoordinates(zCoords);
+
+	// data arrays
+	std::string arrayNames[] = {
+		"z",
+		"Classed LAD",
+		"Flow u",
+		"Flow v",
+		"Flow w",
+		"Wind speed",
+		"Wind speed change",
+		"Wind direction",
+		"Pressure perturb",
+		"Pot. temperature",
+		"Pot. temperature (Diff K)",
+		"Pot. temperature Change K/h",
+		"Spec. humidity",
+		"Relative humidity",
+		"Turbulent kinetic energy",
+		"Dissipitation",
+		"Vertical exchange coef.",
+		"Horizontal exchange coef.",
+		"Absoule LAD",
+		"Direct SW radiation",
+		"Diffuse SW radiation",
+		"Reflected SW radiation",
+		"Longwave rad. environment",
+		"Sky-view-factor buildings",
+		"Sky-view-factor buildings + vegetation",
+		"Temperature flux",
+		"Vapour flux",
+		"Water on leafs",
+		"Wall temperature x",
+		"Wall temperature y",
+		"Wall temperature z",
+		"Leaf temperature",
+		"Local mixing length",
+		"PMV",
+		"Percentage people dissatisfied",
+		"Mean radiant temperature",
+		"Gas/particle concentration",
+		"Gas/particle source",
+		"Deposition velocities",
+		"Total deposed mass",
+		"Deposed mass time averaged",
+		"TKE normalised 1D",
+		"Dissipitaion normalised 1D",
+		"km normalised 1D",
+		"TKE mechanical prod",
+		"Stomata resistance",
+		"CO2",
+		"CO2 ppm",
+		"Plant CO2 flux",
+		"Div Rlw Temp change",
+		"Local mass budget"
+	};
+
+	std::ifstream in (this->FileName, std::ifstream::in | std::ios::binary);
+	if(!in.is_open())
+	{
+		vtkErrorMacro(<< "File " << this->FileName << " could not be opened");
+		return -1;
+	}
+
+	// TODO: read all vars
+	int numVars = 5;
+	for(int varIndex = 0; varIndex < numVars; varIndex++)
+	{
+		vtkFloatArray *varArray = vtkFloatArray::New();
+		varArray->SetName(arrayNames[varIndex].c_str());
+		varArray->SetNumberOfTuples(x_dim*y_dim*z_dim);
+		for(int zIndex = 0; zIndex < z_dim; zIndex++)
+		{
+			for(int xIndex = 0; xIndex < x_dim; xIndex++)
+			{
+				for(int yIndex = 0; yIndex < y_dim; yIndex++)
+				{
+					float myFloat = -9999;
+					in.read(reinterpret_cast<char *>(&myFloat), sizeof(myFloat));
+					varArray->SetValue(xIndex + yIndex*x_dim + zIndex*x_dim*y_dim, myFloat);
+				}
+			}
+		}
+
+		output->GetPointData()->AddArray(varArray);
+	}
+
+	in.close();
+
 
 	return 1;
 }
