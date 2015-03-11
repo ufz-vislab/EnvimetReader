@@ -85,8 +85,16 @@ int EnvimetReader::RequestData(
 	vtkFloatArray *yCoords = vtkFloatArray::New();
 	for(int i = 0; i < y_dim; i++) yCoords->InsertNextValue(i*y_spacing);
 	vtkFloatArray *zCoords = vtkFloatArray::New();
+	zCoords->InsertNextValue(0.f);
 	zCoords->InsertNextValue(1.f);
-	for(int i = 1; i < z_dim; i++) zCoords->InsertNextValue(1.2f * zCoords->GetValue(i-1));
+	float z_sum = 1;
+	for(int i = 2; i < z_dim; i++)
+	{
+		float lastCellHeight = zCoords->GetValue(i-1)-zCoords->GetValue(i-2);
+		float currentCellHeight = 1.2f * lastCellHeight;
+		z_sum += currentCellHeight;
+		zCoords->InsertNextValue(z_sum);
+	}
 
 	output->SetXCoordinates(xCoords);
 	output->SetYCoordinates(yCoords);
