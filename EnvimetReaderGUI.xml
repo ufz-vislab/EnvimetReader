@@ -1,0 +1,5 @@
+<ParaViewReaders>
+	<Reader name="EnvimetReader" extensions="EDT"
+	        file_description="ENVI-met file">
+	</Reader>
+</ParaViewReaders>

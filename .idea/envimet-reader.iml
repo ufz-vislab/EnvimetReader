@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/Debug/EnvimetReaderInit.cxx">
+      <sourceFolder url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/Debug/EnvimetReaderInit.cxx" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/Debug/EnvimetReader_Plugin.cxx">
+      <sourceFolder url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/Debug/EnvimetReader_Plugin.cxx" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/MinSizeRel/EnvimetReaderInit.cxx">
+      <sourceFolder url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/MinSizeRel/EnvimetReaderInit.cxx" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/MinSizeRel/EnvimetReader_Plugin.cxx">
+      <sourceFolder url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/MinSizeRel/EnvimetReader_Plugin.cxx" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/RelWithDebInfo/EnvimetReaderInit.cxx">
+      <sourceFolder url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/RelWithDebInfo/EnvimetReaderInit.cxx" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/RelWithDebInfo/EnvimetReader_Plugin.cxx">
+      <sourceFolder url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/RelWithDebInfo/EnvimetReader_Plugin.cxx" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/Release/EnvimetReaderInit.cxx">
+      <sourceFolder url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/Release/EnvimetReaderInit.cxx" isTestSource="false" />
+    </content>
+    <content url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/Release/EnvimetReader_Plugin.cxx">
+      <sourceFolder url="file://$USER_HOME$/Library/Caches/clion10/cmake/generated/3dabed9d/3dabed9d/Release/EnvimetReader_Plugin.cxx" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

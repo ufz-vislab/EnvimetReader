@@ -1,0 +1,24 @@
+<ServerManagerConfiguration>
+	<ProxyGroup name="sources">
+		<SourceProxy name="EnvimetReader" class="EnvimetReader" label="EnvimetReader">
+			<Documentation
+				 long_help="Read a ENVI-met file."
+				 short_help="Read a ENVI-met file.">
+			</Documentation>
+			<StringVectorProperty
+						name="FileName"
+						animateable="0"
+						command="SetFileName"
+						number_of_elements="1">
+				<FileListDomain name="files"/>
+				<Documentation>
+					This property specifies the file name for the reader.
+				</Documentation>
+			</StringVectorProperty>
+
+			<Hints>
+				<ReaderFactory extensions="EDT" file_description="ENVI-met file" />
+		 </Hints>
+		</SourceProxy>
+	</ProxyGroup>
+</ServerManagerConfiguration>
