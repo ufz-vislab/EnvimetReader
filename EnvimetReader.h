@@ -3,6 +3,8 @@
 
 #include "vtkRectilinearGridAlgorithm.h"
 
+class vtkDataArraySelection;
+
 
 class EnvimetReader : public vtkRectilinearGridAlgorithm
 {
@@ -16,6 +18,12 @@ public:
 	// Specify file name of the .abc file.
 	vtkSetStringMacro(FileName);
 	vtkGetStringMacro(FileName);
+
+	// Array selection interface
+	int GetNumberOfPointArrays() const;
+	const char * GetPointArrayName(int index) const;
+	int GetPointArrayStatus(const char *name) const;
+	void SetPointArrayStatus(const char *name, int status);
 
 protected:
 	EnvimetReader();
@@ -37,6 +45,8 @@ private:
 	void operator=(const EnvimetReader&);  // Not implemented.
 
 	char* FileName;
+
+	vtkDataArraySelection* _arraySelection;
 };
 
 #endif

@@ -8,6 +8,7 @@
 #include <vtkPointData.h>
 #include <vtkDataArray.h>
 #include <vtkFloatArray.h>
+#include <vtkDataArraySelection.h>
 
 #include <iostream>
 #include <fstream>
@@ -20,6 +21,7 @@ EnvimetReader::EnvimetReader()
 	this->FileName = NULL;
 	this->SetNumberOfInputPorts(0);
 	this->SetNumberOfOutputPorts(1);
+	_arraySelection = vtkDataArraySelection::New();
 }
 
 int EnvimetReader::RequestInformation(
@@ -43,6 +45,13 @@ int EnvimetReader::RequestInformation(
 	x_dim = 249;
 	y_dim = 249;
 	z_dim = 30;
+
+	_arraySelection->AddArray("z");
+	_arraySelection->AddArray("Classed LAD");
+	_arraySelection->AddArray("Flow u");
+	_arraySelection->AddArray("Flow v");
+	_arraySelection->AddArray("Flow w");
+	_arraySelection->EnableAllArrays();
 
 	int ext[6] = {0, x_dim, 0, y_dim, 0, z_dim};
 	double origin[3] = {0, 0, 0};
@@ -153,26 +162,111 @@ int EnvimetReader::RequestData(
 	}
 
 	// TODO: read all vars
-	int numVars = 5;
 	const vtkIdType numTuples = x_dim*y_dim*z_dim;
-	for(int varIndex = 0; varIndex < numVars; varIndex++)
+
+	for(int arrayIndex = 0; arrayIndex < _arraySelection->GetNumberOfArrays(); arrayIndex++)
 	{
-		vtkFloatArray *varArray = vtkFloatArray::New();
-		varArray->SetName(arrayNames[varIndex].c_str());
-		varArray->SetNumberOfTuples(numTuples);
+		if((bool)_arraySelection->GetArraySetting(arrayIndex))
+		{
+			// Read into vtk array
+			vtkFloatArray *floatArray = vtkFloatArray::New();
+			floatArray->SetName(arrayNames[arrayIndex].c_str());
+			floatArray->SetNumberOfTuples(numTuples);
 
-		float* tuples = new float[numTuples];
-		in.read(reinterpret_cast<char *>(&tuples[0]), sizeof(float)*numTuples);
-		// Ownership of tuples is handed over to varArray
-		varArray->SetArray(tuples, numTuples, 0);
+			float *floats = new float[numTuples];
+			in.read(reinterpret_cast<char *>(&floats[0]), sizeof(float) * numTuples);
+			// Ownership of floats is handed over to floatArray
+			floatArray->SetArray(floats, numTuples, 0);
 
-		output->GetPointData()->AddArray(varArray);
+			output->GetPointData()->AddArray(floatArray);
+		}
+		else
+			// Move on to the next array
+			in.seekg(sizeof(float) * numTuples, std::ios_base::cur);
 	}
 
 	in.close();
 
 
 	return 1;
+}
+
+int EnvimetReader::GetNumberOfPointArrays() const
+{
+	return _arraySelection->GetNumberOfArrays();
+}
+
+const char * EnvimetReader::GetPointArrayName(int index) const
+{
+	// data arrays
+	std::string arrayNames[] = {
+		"z",
+		"Classed LAD",
+		"Flow u",
+		"Flow v",
+		"Flow w",
+		"Wind speed",
+		"Wind speed change",
+		"Wind direction",
+		"Pressure perturb",
+		"Pot. temperature",
+		"Pot. temperature (Diff K)",
+		"Pot. temperature Change K/h",
+		"Spec. humidity",
+		"Relative humidity",
+		"Turbulent kinetic energy",
+		"Dissipitation",
+		"Vertical exchange coef.",
+		"Horizontal exchange coef.",
+		"Absoule LAD",
+		"Direct SW radiation",
+		"Diffuse SW radiation",
+		"Reflected SW radiation",
+		"Longwave rad. environment",
+		"Sky-view-factor buildings",
+		"Sky-view-factor buildings + vegetation",
+		"Temperature flux",
+		"Vapour flux",
+		"Water on leafs",
+		"Wall temperature x",
+		"Wall temperature y",
+		"Wall temperature z",
+		"Leaf temperature",
+		"Local mixing length",
+		"PMV",
+		"Percentage people dissatisfied",
+		"Mean radiant temperature",
+		"Gas/particle concentration",
+		"Gas/particle source",
+		"Deposition velocities",
+		"Total deposed mass",
+		"Deposed mass time averaged",
+		"TKE normalised 1D",
+		"Dissipitaion normalised 1D",
+		"km normalised 1D",
+		"TKE mechanical prod",
+		"Stomata resistance",
+		"CO2",
+		"CO2 ppm",
+		"Plant CO2 flux",
+		"Div Rlw Temp change",
+		"Local mass budget"
+	};
+
+	return arrayNames[index].c_str();
+}
+
+int EnvimetReader::GetPointArrayStatus(const char *name) const
+{
+	return _arraySelection->ArrayIsEnabled(name);
+}
+
+void EnvimetReader::SetPointArrayStatus(const char *name, int status)
+{
+	if((bool)status)
+		_arraySelection->EnableArray(name);
+	else
+		_arraySelection->DisableArray(name);
 }
 
 void EnvimetReader::PrintSelf(ostream& os, vtkIndent indent)
