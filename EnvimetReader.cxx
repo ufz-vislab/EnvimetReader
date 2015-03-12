@@ -154,23 +154,17 @@ int EnvimetReader::RequestData(
 
 	// TODO: read all vars
 	int numVars = 5;
+	const vtkIdType numTuples = x_dim*y_dim*z_dim;
 	for(int varIndex = 0; varIndex < numVars; varIndex++)
 	{
 		vtkFloatArray *varArray = vtkFloatArray::New();
 		varArray->SetName(arrayNames[varIndex].c_str());
-		varArray->SetNumberOfTuples(x_dim*y_dim*z_dim);
-		for(int zIndex = 0; zIndex < z_dim; zIndex++)
-		{
-			for(int xIndex = 0; xIndex < x_dim; xIndex++)
-			{
-				for(int yIndex = 0; yIndex < y_dim; yIndex++)
-				{
-					float myFloat = -9999;
-					in.read(reinterpret_cast<char *>(&myFloat), sizeof(myFloat));
-					varArray->SetValue(xIndex + yIndex*x_dim + zIndex*x_dim*y_dim, myFloat);
-				}
-			}
-		}
+		varArray->SetNumberOfTuples(numTuples);
+
+		float* tuples = new float[numTuples];
+		in.read(reinterpret_cast<char *>(&tuples[0]), sizeof(float)*numTuples);
+		// Ownership of tuples is handed over to varArray
+		varArray->SetArray(tuples, numTuples, 0);
 
 		output->GetPointData()->AddArray(varArray);
 	}
