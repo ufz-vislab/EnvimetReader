@@ -21,6 +21,10 @@ public:
 	vtkGetStringMacro(FileName);
 
 	// Description:
+	// Test whether the file with the given name can be read by this reader.
+	int CanReadFile(const char* name, const char* extension);
+
+	// Description:
 	// Get the data array selection tables used to configure which data
 	// arrays are loaded by the reader.
 	vtkGetObjectMacro(PointDataArraySelection, vtkDataArraySelection);
@@ -30,13 +34,11 @@ public:
 	int GetNumberOfPointArrays();
 
 	// Description:
-	// Get the name of the point or cell array with the given index in
-	// the input.
+	// Get the name of the point or cell array with the given index in the input.
 	const char * GetPointArrayName(int index);
 
 	// Description:
-	// Get/Set whether the point or cell array with the given name is to
-	// be read.
+	// Get/Set whether the point or cell array with the given name is to be read.
 	int GetPointArrayStatus(const char *name);
 	void SetPointArrayStatus(const char *name, int status);
 
