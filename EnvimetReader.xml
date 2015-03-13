@@ -1,6 +1,6 @@
 <ServerManagerConfiguration>
-	<ProxyGroup name="sources">
-		<SourceProxy name="EnvimetReader" class="EnvimetReader" label="ENVI-met Reader">
+	<ProxyGroup name="internal_sources">
+		<SourceProxy name="InternalEnvimetReader" class="EnvimetReader" label="ENVI-met Reader">
 			<Documentation
 				 long_help="Reads a ENVI-met file."
 				 short_help="Reads a ENVI-met file.">
@@ -45,8 +45,75 @@
 
 			<Hints>
 				<ReaderFactory extensions="EDI" file_description="ENVI-met file" />
-		 </Hints>
+		 	</Hints>
 
 		</SourceProxy>
 	</ProxyGroup>
+
+	<ProxyGroup name="sources">
+		<SourceProxy name="EnvimetReader" label="ENVI-met Reader"
+		             class="vtkFileSeriesReader" si_class="vtkSIMetaReaderProxy"
+		             file_name_method="SetFileName">
+			<Documentation
+					long_help="Reads a ENVI-met file."
+					short_help="Reads a ENVI-met file.">
+				The ENVI-met reader reads a file pair of one EDI and one EDT file.
+				The standard extension is .EDI. This reader also supports file series.
+			</Documentation>
+
+			<SubProxy>
+				<Proxy name="Reader"
+					   proxygroup="internal_sources" proxyname="InternalEnvimetReader">
+				</Proxy>
+				<ExposedProperties>
+					<PropertyGroup label="Cell/Point Array Status"
+								   name="CellPointArrayStatus"
+								   panel_visibility="default"
+								   panel_widget="ArrayStatus">
+						<Property name="PointArrayInfo" />
+						<Property name="PointArrayStatus" />
+					</PropertyGroup>
+				</ExposedProperties>
+			</SubProxy>
+
+			<StringVectorProperty name="FileNameInfo"
+								  command="GetCurrentFileName"
+								  information_only="1" >
+				<SimpleStringInformationHelper />
+			</StringVectorProperty>
+
+			<StringVectorProperty
+					name="FileName"
+					clean_command="RemoveAllFileNames"
+					command="AddFileName"
+					animateable="0"
+					information_property="FileNameInfo"
+					number_of_elements="1"
+					panel_visibility="never"
+					repeat_command="1">
+				<FileListDomain name="files"/>
+				<Documentation>
+					The list of files to be read by the reader. If more than 1 file is specified,
+					the reader will switch to file series mode in which it will pretend that it
+					can support time and provide 1 file per time step.
+				</Documentation>
+			</StringVectorProperty>
+
+			<DoubleVectorProperty
+					name="TimestepValues"
+					repeatable="1"
+					information_only="1">
+				<TimeStepsInformationHelper/>
+				<Documentation>
+					Available timestep values.
+				</Documentation>
+			</DoubleVectorProperty>
+
+
+			<Hints>
+				<ReaderFactory extensions="EDI" file_description="ENVI-met file" />
+			</Hints>
+		</SourceProxy>
+	</ProxyGroup>
+
 </ServerManagerConfiguration>
