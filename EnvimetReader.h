@@ -4,7 +4,8 @@
 #include "vtkRectilinearGridAlgorithm.h"
 
 class vtkDataArraySelection;
-
+class vtkFloatArray;
+class vtkCallbackCommand;
 
 class EnvimetReader : public vtkRectilinearGridAlgorithm
 {
@@ -19,34 +20,64 @@ public:
 	vtkSetStringMacro(FileName);
 	vtkGetStringMacro(FileName);
 
-	// Array selection interface
-	int GetNumberOfPointArrays() const;
-	const char * GetPointArrayName(int index) const;
-	int GetPointArrayStatus(const char *name) const;
+	// Description:
+	// Get the data array selection tables used to configure which data
+	// arrays are loaded by the reader.
+	vtkGetObjectMacro(PointDataArraySelection, vtkDataArraySelection);
+
+	// Description:
+	// Get the number of point or cell arrays available in the input.
+	int GetNumberOfPointArrays();
+
+	// Description:
+	// Get the name of the point or cell array with the given index in
+	// the input.
+	const char * GetPointArrayName(int index);
+
+	// Description:
+	// Get/Set whether the point or cell array with the given name is to
+	// be read.
+	int GetPointArrayStatus(const char *name);
 	void SetPointArrayStatus(const char *name, int status);
 
 protected:
 	EnvimetReader();
-	~EnvimetReader(){}
-
-	float x_spacing;
-	float y_spacing;
-	int x_dim;
-	int y_dim;
-	int z_dim;
+	~EnvimetReader();
 
 	int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 	int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
-	//vtkDelimitedTextReader* Reader;
+	// Callback registered with the SelectionObserver.
+	static void SelectionModifiedCallback(vtkObject* caller, unsigned long eid,
+		void* clientdata, void* calldata);
+
+	// The input file's name.
+	char* FileName;
+
+	// The number of nesting cells in x and y direction.
+	unsigned int NumberOfNestingCells;
+
+	// The observer to modify this object when the array selections are modified.
+	vtkCallbackCommand* SelectionObserver;
+
+	// The array selections
+	vtkDataArraySelection* PointDataArraySelection;
+
+	// The cell coordinates (sizes).
+	vtkFloatArray *XCoordinates;
+	vtkFloatArray *YCoordinates;
+	vtkFloatArray *ZCoordinates;
+
+	// The number of cells in each dimension.
+	int XDimension;
+	int YDimension;
+	int ZDimension;
 
 private:
 	EnvimetReader(const EnvimetReader&);  // Not implemented.
 	void operator=(const EnvimetReader&);  // Not implemented.
 
-	char* FileName;
-
-	vtkDataArraySelection* _arraySelection;
+	bool _infoFileRead;
 };
 
 #endif

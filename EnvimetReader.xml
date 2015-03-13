@@ -1,15 +1,18 @@
 <ServerManagerConfiguration>
 	<ProxyGroup name="sources">
-		<SourceProxy name="EnvimetReader" class="EnvimetReader" label="EnvimetReader">
+		<SourceProxy name="EnvimetReader" class="EnvimetReader" label="ENVI-met Reader">
 			<Documentation
-				 long_help="Read a ENVI-met file."
-				 short_help="Read a ENVI-met file.">
+				 long_help="Reads a ENVI-met file."
+				 short_help="Reads a ENVI-met file.">
+				The ENVI-met reader reads a file pair of one EDI and one EDT file.
+				The standard extension is .EDI.
 			</Documentation>
 			<StringVectorProperty
 						name="FileName"
 						animateable="0"
 						command="SetFileName"
-						number_of_elements="1">
+						number_of_elements="1"
+						panel_visibility="never">
 				<FileListDomain name="files"/>
 				<Documentation>
 					This property specifies the file name for the reader.
@@ -24,7 +27,8 @@
 			<StringVectorProperty name="PointArrayStatus"
 								  command="SetPointArrayStatus"
 								  number_of_elements="0"
-								  repeat_command="1" number_of_elements_per_command="2"
+								  repeat_command="1"
+								  number_of_elements_per_command="2"
 								  element_types="2 0"
 								  information_property="PointArrayInfo"
 								  label="Point Arrays">
@@ -34,11 +38,15 @@
 								  function="ArrayList"/>
 					</RequiredProperties>
 				</ArraySelectionDomain>
+				<Documentation>
+					This property lists which point-centered arrays to read.
+				</Documentation>
 			</StringVectorProperty>
 
 			<Hints>
-				<ReaderFactory extensions="EDT" file_description="ENVI-met file" />
+				<ReaderFactory extensions="EDI" file_description="ENVI-met file" />
 		 </Hints>
+
 		</SourceProxy>
 	</ProxyGroup>
 </ServerManagerConfiguration>

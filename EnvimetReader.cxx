@@ -9,6 +9,7 @@
 #include <vtkDataArray.h>
 #include <vtkFloatArray.h>
 #include <vtkDataArraySelection.h>
+#include <vtkCallbackCommand.h>
 
 #include <iostream>
 #include <fstream>
@@ -17,11 +18,30 @@
 vtkStandardNewMacro(EnvimetReader);
 
 EnvimetReader::EnvimetReader()
+: _infoFileRead(false)
 {
-	this->FileName = NULL;
-	this->SetNumberOfInputPorts(0);
-	this->SetNumberOfOutputPorts(1);
-	_arraySelection = vtkDataArraySelection::New();
+	FileName = NULL;
+	NumberOfNestingCells = 12;
+	SetNumberOfInputPorts(0);
+	SetNumberOfOutputPorts(1);
+	PointDataArraySelection = vtkDataArraySelection::New();
+	SelectionObserver = vtkCallbackCommand::New();
+	SelectionObserver->SetCallback(&EnvimetReader::SelectionModifiedCallback);
+	SelectionObserver->SetClientData(this);
+	PointDataArraySelection->AddObserver(vtkCommand::ModifiedEvent, this->SelectionObserver);
+	XCoordinates = vtkFloatArray::New();
+	YCoordinates = vtkFloatArray::New();
+	ZCoordinates = vtkFloatArray::New();
+}
+
+EnvimetReader::~EnvimetReader()
+{
+	XCoordinates->Delete();
+	YCoordinates->Delete();
+	ZCoordinates->Delete();
+	PointDataArraySelection->RemoveObserver(this->SelectionObserver);
+	SelectionObserver->Delete();
+	PointDataArraySelection->Delete();
 }
 
 int EnvimetReader::RequestInformation(
@@ -29,7 +49,12 @@ int EnvimetReader::RequestInformation(
 	vtkInformationVector **vtkNotUsed(inputVector),
 	vtkInformationVector *outputVector)
 {
+
+	if(_infoFileRead)
+		return 1;
+
 	vtkInformation *outInfo = outputVector->GetInformationObject(0);
+
 
 	if(!this->FileName)
 	{
@@ -37,23 +62,66 @@ int EnvimetReader::RequestInformation(
 		return -1;
 	}
 
-	vtkDebugMacro (<< "reading seismic header");
-	// TODO: read this info from EDI file
-	x_spacing = 5;
-	y_spacing = 5;
+	std::ifstream in (this->FileName, std::ifstream::in);
+	if(!in.is_open())
+	{
+		vtkErrorMacro(<< "File " << this->FileName << " could not be opened");
+		return -1;
+	}
+	std::string line;
+	std::getline(in, line);
+	// TODO "Waldstr 07:00:00 07.09.2013"
+	std::getline(in, line);
+	XDimension = std::stoi(line);
+	std::getline(in, line);
+	YDimension = std::stoi(line);
+	std::getline(in, line);
+	ZDimension = std::stoi(line);
+	std::getline(in, line);
+	// TODO "51"?
 
-	x_dim = 249;
-	y_dim = 249;
-	z_dim = 30;
+	// Array names
+	while(line.find("Gridspacing") == std::string::npos)
+	{
+		std::getline(in, line);
+		if(line.find("Gridspacing") == std::string::npos)
+			PointDataArraySelection->AddArray(line.c_str());
+	}
+	PointDataArraySelection->DisableAllArrays();
 
-	_arraySelection->AddArray("z");
-	_arraySelection->AddArray("Classed LAD");
-	_arraySelection->AddArray("Flow u");
-	_arraySelection->AddArray("Flow v");
-	_arraySelection->AddArray("Flow w");
-	_arraySelection->EnableAllArrays();
+	XCoordinates->Reset();
+	XCoordinates->InsertNextValue(0.0f);
+	for(int i = 0; i < XDimension; i++)
+	{
+		std::getline(in, line);
+		const float cellSize = std::stof(line);
+		XCoordinates->InsertNextValue(XCoordinates->GetValue(i) + cellSize);
+	}
 
-	int ext[6] = {0, x_dim, 0, y_dim, 0, z_dim};
+	YCoordinates->Reset();
+	YCoordinates->InsertNextValue(0.0f);
+	for(int i = 0; i < YDimension; i++)
+	{
+		std::getline(in, line);
+		const float cellSize = std::stof(line);
+		YCoordinates->InsertNextValue(YCoordinates->GetValue(i) + cellSize);
+	}
+
+	ZCoordinates->Reset();
+	ZCoordinates->InsertNextValue(0.0f);
+	for(int i = 0; i < ZDimension; i++)
+	{
+		std::getline(in, line);
+		const float cellSize = std::stof(line);
+		ZCoordinates->InsertNextValue(ZCoordinates->GetValue(i) + cellSize);
+	}
+
+	in.close();
+	_infoFileRead = true;
+
+	int ext[6] = { NumberOfNestingCells - 1, XDimension - NumberOfNestingCells - 1,
+	               NumberOfNestingCells - 1, YDimension - NumberOfNestingCells - 1,
+	               0, ZDimension - 1 };
 	double origin[3] = {0, 0, 0};
 
 	outInfo->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), ext, 6);
@@ -78,99 +146,38 @@ int EnvimetReader::RequestData(
 		outInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT()));
 
 	// Points
-	output->SetDimensions(x_dim, y_dim, z_dim);
-	vtkFloatArray *xCoords = vtkFloatArray::New();
-	for(int i = 0; i < x_dim; i++) xCoords->InsertNextValue(i*x_spacing);
-	vtkFloatArray *yCoords = vtkFloatArray::New();
-	for(int i = 0; i < y_dim; i++) yCoords->InsertNextValue(i*y_spacing);
-	vtkFloatArray *zCoords = vtkFloatArray::New();
-	zCoords->InsertNextValue(0.f);
-	zCoords->InsertNextValue(1.f);
-	float z_sum = 1;
-	for(int i = 2; i < z_dim; i++)
+	output->SetDimensions(XDimension, YDimension, ZDimension);
+
+	output->SetXCoordinates(XCoordinates);
+	output->SetYCoordinates(YCoordinates);
+	output->SetZCoordinates(ZCoordinates);
+
+	if(PointDataArraySelection->GetNumberOfArraysEnabled() == 0)
 	{
-		float lastCellHeight = zCoords->GetValue(i-1)-zCoords->GetValue(i-2);
-		float currentCellHeight = 1.2f * lastCellHeight;
-		z_sum += currentCellHeight;
-		zCoords->InsertNextValue(z_sum);
+		vtkErrorMacro(<< "No data arrays enabled. Only the mesh itself was loaded.")
+		return 1;
 	}
 
-	output->SetXCoordinates(xCoords);
-	output->SetYCoordinates(yCoords);
-	output->SetZCoordinates(zCoords);
+	std::string asciiFileName = std::string(FileName);
+	std::string binaryFileName = asciiFileName.substr(0, asciiFileName.size() - 3).append("EDT");
 
-	// data arrays
-	std::string arrayNames[] = {
-		"z",
-		"Classed LAD",
-		"Flow u",
-		"Flow v",
-		"Flow w",
-		"Wind speed",
-		"Wind speed change",
-		"Wind direction",
-		"Pressure perturb",
-		"Pot. temperature",
-		"Pot. temperature (Diff K)",
-		"Pot. temperature Change K/h",
-		"Spec. humidity",
-		"Relative humidity",
-		"Turbulent kinetic energy",
-		"Dissipitation",
-		"Vertical exchange coef.",
-		"Horizontal exchange coef.",
-		"Absoule LAD",
-		"Direct SW radiation",
-		"Diffuse SW radiation",
-		"Reflected SW radiation",
-		"Longwave rad. environment",
-		"Sky-view-factor buildings",
-		"Sky-view-factor buildings + vegetation",
-		"Temperature flux",
-		"Vapour flux",
-		"Water on leafs",
-		"Wall temperature x",
-		"Wall temperature y",
-		"Wall temperature z",
-		"Leaf temperature",
-		"Local mixing length",
-		"PMV",
-		"Percentage people dissatisfied",
-		"Mean radiant temperature",
-		"Gas/particle concentration",
-		"Gas/particle source",
-		"Deposition velocities",
-		"Total deposed mass",
-		"Deposed mass time averaged",
-		"TKE normalised 1D",
-		"Dissipitaion normalised 1D",
-		"km normalised 1D",
-		"TKE mechanical prod",
-		"Stomata resistance",
-		"CO2",
-		"CO2 ppm",
-		"Plant CO2 flux",
-		"Div Rlw Temp change",
-		"Local mass budget"
-	};
-
-	std::ifstream in (this->FileName, std::ifstream::in | std::ios::binary);
+	std::ifstream in (binaryFileName.c_str(), std::ifstream::in | std::ios::binary);
 	if(!in.is_open())
 	{
-		vtkErrorMacro(<< "File " << this->FileName << " could not be opened");
+		vtkErrorMacro(<< "File " << binaryFileName.c_str() << " could not be opened");
 		return -1;
 	}
 
-	// TODO: read all vars
-	const vtkIdType numTuples = x_dim*y_dim*z_dim;
+	const vtkIdType numTuples = XDimension * YDimension * ZDimension;
 
-	for(int arrayIndex = 0; arrayIndex < _arraySelection->GetNumberOfArrays(); arrayIndex++)
+	for(int arrayIndex = 0; arrayIndex < PointDataArraySelection->GetNumberOfArrays(); arrayIndex++)
 	{
-		if((bool)_arraySelection->GetArraySetting(arrayIndex))
+		if(PointDataArraySelection->GetArraySetting(arrayIndex) &&
+			!output->GetPointData()->HasArray(GetPointArrayName(arrayIndex)))
 		{
 			// Read into vtk array
 			vtkFloatArray *floatArray = vtkFloatArray::New();
-			floatArray->SetName(arrayNames[arrayIndex].c_str());
+			floatArray->SetName(PointDataArraySelection->GetArrayName(arrayIndex));
 			floatArray->SetNumberOfTuples(numTuples);
 
 			float *floats = new float[numTuples];
@@ -187,92 +194,41 @@ int EnvimetReader::RequestData(
 
 	in.close();
 
-
 	return 1;
 }
 
-int EnvimetReader::GetNumberOfPointArrays() const
+void EnvimetReader::SelectionModifiedCallback(vtkObject*, unsigned long, void* clientdata, void*)
 {
-	return _arraySelection->GetNumberOfArrays();
+	static_cast<EnvimetReader*>(clientdata)->Modified();
 }
 
-const char * EnvimetReader::GetPointArrayName(int index) const
+int EnvimetReader::GetNumberOfPointArrays()
 {
-	// data arrays
-	std::string arrayNames[] = {
-		"z",
-		"Classed LAD",
-		"Flow u",
-		"Flow v",
-		"Flow w",
-		"Wind speed",
-		"Wind speed change",
-		"Wind direction",
-		"Pressure perturb",
-		"Pot. temperature",
-		"Pot. temperature (Diff K)",
-		"Pot. temperature Change K/h",
-		"Spec. humidity",
-		"Relative humidity",
-		"Turbulent kinetic energy",
-		"Dissipitation",
-		"Vertical exchange coef.",
-		"Horizontal exchange coef.",
-		"Absoule LAD",
-		"Direct SW radiation",
-		"Diffuse SW radiation",
-		"Reflected SW radiation",
-		"Longwave rad. environment",
-		"Sky-view-factor buildings",
-		"Sky-view-factor buildings + vegetation",
-		"Temperature flux",
-		"Vapour flux",
-		"Water on leafs",
-		"Wall temperature x",
-		"Wall temperature y",
-		"Wall temperature z",
-		"Leaf temperature",
-		"Local mixing length",
-		"PMV",
-		"Percentage people dissatisfied",
-		"Mean radiant temperature",
-		"Gas/particle concentration",
-		"Gas/particle source",
-		"Deposition velocities",
-		"Total deposed mass",
-		"Deposed mass time averaged",
-		"TKE normalised 1D",
-		"Dissipitaion normalised 1D",
-		"km normalised 1D",
-		"TKE mechanical prod",
-		"Stomata resistance",
-		"CO2",
-		"CO2 ppm",
-		"Plant CO2 flux",
-		"Div Rlw Temp change",
-		"Local mass budget"
-	};
-
-	return arrayNames[index].c_str();
+	return PointDataArraySelection->GetNumberOfArrays();
 }
 
-int EnvimetReader::GetPointArrayStatus(const char *name) const
+const char * EnvimetReader::GetPointArrayName(int index)
 {
-	return _arraySelection->ArrayIsEnabled(name);
+	return PointDataArraySelection->GetArrayName(index);
+}
+
+int EnvimetReader::GetPointArrayStatus(const char *name)
+{
+	return PointDataArraySelection->ArrayIsEnabled(name);
 }
 
 void EnvimetReader::SetPointArrayStatus(const char *name, int status)
 {
-	if((bool)status)
-		_arraySelection->EnableArray(name);
+	if(status)
+		PointDataArraySelection->EnableArray(name);
 	else
-		_arraySelection->DisableArray(name);
+		PointDataArraySelection->DisableArray(name);
 }
 
 void EnvimetReader::PrintSelf(ostream& os, vtkIndent indent)
 {
-	this->Superclass::PrintSelf(os,indent);
+	Superclass::PrintSelf(os,indent);
 
 	os << indent << "File Name: "
-		<< (this->FileName ? this->FileName : "(none)") << "\n";
+		<< (FileName ? FileName : "(none)") << "\n";
 }

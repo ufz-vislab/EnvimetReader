@@ -1,5 +1,5 @@
 <ParaViewReaders>
-	<Reader name="EnvimetReader" extensions="EDT"
+	<Reader name="EnvimetReader" extensions="EDI"
 	        file_description="ENVI-met file">
 	</Reader>
 </ParaViewReaders>
