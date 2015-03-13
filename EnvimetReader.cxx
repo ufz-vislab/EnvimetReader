@@ -169,6 +169,8 @@ int EnvimetReader::RequestData(
 	}
 
 	const vtkIdType numTuples = XDimension * YDimension * ZDimension;
+	const int numArrays = PointDataArraySelection->GetNumberOfArraysEnabled();
+	int numArraysRead = 0;
 
 	for(int arrayIndex = 0; arrayIndex < PointDataArraySelection->GetNumberOfArrays(); arrayIndex++)
 	{
@@ -176,16 +178,17 @@ int EnvimetReader::RequestData(
 			!output->GetPointData()->HasArray(GetPointArrayName(arrayIndex)))
 		{
 			// Read into vtk array
+			float *floats = new float[numTuples];
+			in.read(reinterpret_cast<char *>(&floats[0]), sizeof(float) * numTuples);
+
 			vtkFloatArray *floatArray = vtkFloatArray::New();
 			floatArray->SetName(PointDataArraySelection->GetArrayName(arrayIndex));
 			floatArray->SetNumberOfTuples(numTuples);
-
-			float *floats = new float[numTuples];
-			in.read(reinterpret_cast<char *>(&floats[0]), sizeof(float) * numTuples);
-			// Ownership of floats is handed over to floatArray
-			floatArray->SetArray(floats, numTuples, 0);
-
+			floatArray->SetArray(floats, numTuples, 0); // Ownership of floats is handed over to floatArray
 			output->GetPointData()->AddArray(floatArray);
+
+			if(numArraysRead == numArrays)
+				break;
 		}
 		else
 			// Move on to the next array
