@@ -95,11 +95,11 @@ int EnvimetReader::RequestInformation(
 	std::getline(in, line);
 	// TODO "Waldstr 07:00:00 07.09.2013"
 	std::getline(in, line);
-	XDimension = std::stoi(line);
+	XDimension = atoi(line.c_str());
 	std::getline(in, line);
-	YDimension = std::stoi(line);
+	YDimension = atoi(line.c_str());
 	std::getline(in, line);
-	ZDimension = std::stoi(line);
+	ZDimension = atoi(line.c_str());
 	std::getline(in, line);
 	// TODO "51"?
 
@@ -117,7 +117,7 @@ int EnvimetReader::RequestInformation(
 	for(int i = 0; i < XDimension; i++)
 	{
 		std::getline(in, line);
-		const float cellSize = std::stof(line);
+		const float cellSize = atof(line.c_str());
 		XCoordinates->InsertNextValue(XCoordinates->GetValue(i) + cellSize);
 	}
 
@@ -126,7 +126,7 @@ int EnvimetReader::RequestInformation(
 	for(int i = 0; i < YDimension; i++)
 	{
 		std::getline(in, line);
-		const float cellSize = std::stof(line);
+		const float cellSize = atof(line.c_str());
 		YCoordinates->InsertNextValue(YCoordinates->GetValue(i) + cellSize);
 	}
 
@@ -135,7 +135,7 @@ int EnvimetReader::RequestInformation(
 	for(int i = 0; i < ZDimension; i++)
 	{
 		std::getline(in, line);
-		const float cellSize = std::stof(line);
+		const float cellSize = atof(line.c_str());
 		ZCoordinates->InsertNextValue(ZCoordinates->GetValue(i) + cellSize);
 	}
 
