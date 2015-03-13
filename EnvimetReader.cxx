@@ -198,6 +198,7 @@ int EnvimetReader::RequestData(
 	const int numArrays = PointDataArraySelection->GetNumberOfArraysEnabled();
 	int numArraysRead = 0;
 
+	UpdateProgress(0.0f);
 	for(int arrayIndex = 0; arrayIndex < PointDataArraySelection->GetNumberOfArrays(); arrayIndex++)
 	{
 		if(PointDataArraySelection->GetArraySetting(arrayIndex) &&
@@ -213,6 +214,8 @@ int EnvimetReader::RequestData(
 			floatArray->SetArray(floats, numTuples, 0); // Ownership of floats is handed over to floatArray
 			output->GetPointData()->AddArray(floatArray);
 
+			UpdateProgress(numArraysRead * 1 / numArrays);
+
 			if(numArraysRead == numArrays)
 				break;
 		}
@@ -220,6 +223,7 @@ int EnvimetReader::RequestData(
 			// Move on to the next array
 			in.seekg(sizeof(float) * numTuples, std::ios_base::cur);
 	}
+	UpdateProgress(1.0f);
 
 	in.close();
 
