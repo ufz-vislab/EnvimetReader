@@ -101,7 +101,7 @@ int EnvimetReader::RequestInformation(
 	std::getline(in, line);
 	ZDimension = atoi(line.c_str());
 	std::getline(in, line);
-	// TODO "51"?
+	const int numVars = atoi(line.c_str());
 
 	// Array names
 	while(line.find("Gridspacing") == std::string::npos)
@@ -110,6 +110,9 @@ int EnvimetReader::RequestInformation(
 		if(line.find("Gridspacing") == std::string::npos)
 			PointDataArraySelection->AddArray(line.c_str());
 	}
+	if(PointDataArraySelection->GetNumberOfArrays() != numVars)
+		vtkErrorMacro(<< "Mismatch of read data arrays (" << PointDataArraySelection->GetNumberOfArrays() <<
+			") to number of data arrays given in EDI-file line 5 (" << numVars << ")");
 	PointDataArraySelection->DisableAllArrays();
 
 	XCoordinates->Reset();
