@@ -155,8 +155,8 @@ int EnvimetReader::RequestInformation(
 	in.close();
 	_infoFileRead = true;
 
-	int ext[6] = { NumberOfNestingCells - 1, XDimension - NumberOfNestingCells - 1,
-	               NumberOfNestingCells - 1, YDimension - NumberOfNestingCells - 1,
+	int ext[6] = { NumberOfNestingCells, XDimension - NumberOfNestingCells - 1,
+	               NumberOfNestingCells, YDimension - NumberOfNestingCells - 1,
 	               0, ZDimension - 1 };
 	double origin[3] = {0, 0, 0};
 
