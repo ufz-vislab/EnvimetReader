@@ -11,6 +11,7 @@
 #include <vtkDataArraySelection.h>
 #include <vtkCallbackCommand.h>
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -64,6 +65,11 @@ int EnvimetReader::CanReadFile(const char *name, const char *extension)
 		return 1;
 }
 
+bool invalidChar (char c)
+{
+	return !(c>=0 && c <128);
+}
+
 int EnvimetReader::RequestInformation(
 	vtkInformation *vtkNotUsed(request),
 	vtkInformationVector **vtkNotUsed(inputVector),
@@ -107,6 +113,10 @@ int EnvimetReader::RequestInformation(
 	while(line.find("Gridspacing") == std::string::npos)
 	{
 		std::getline(in, line);
+		std::replace(line.begin(), line.end(), '(', '-');                          // Replace braces
+		std::replace(line.begin(), line.end(), ')', ' ');                          // Replace braces
+		line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end()); // Remove whitespace
+		line.erase(remove_if(line.begin(),line.end(), invalidChar), line.end());   // Remove non-ascii chars
 		if(line.find("Gridspacing") == std::string::npos)
 			PointDataArraySelection->AddArray(line.c_str());
 	}
