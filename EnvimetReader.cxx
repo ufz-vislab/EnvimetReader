@@ -123,7 +123,6 @@ int EnvimetReader::RequestInformation(
 	if(PointDataArraySelection->GetNumberOfArrays() != numVars)
 		vtkErrorMacro(<< "Mismatch of read data arrays (" << PointDataArraySelection->GetNumberOfArrays() <<
 			") to number of data arrays given in EDI-file line 5 (" << numVars << ")");
-	PointDataArraySelection->DisableAllArrays();
 
 	XCoordinates->Reset();
 	XCoordinates->InsertNextValue(0.0f);
