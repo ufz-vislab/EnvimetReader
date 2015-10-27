@@ -32,6 +32,7 @@ public:
 	vtkFloatArray *ZSpacing;
 
 	// Variables
+	int NumberOfVariables;
 	vtkStringArray *VariableNames;
 
 	// Model description

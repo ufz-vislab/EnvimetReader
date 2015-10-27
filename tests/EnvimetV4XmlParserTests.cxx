@@ -7,10 +7,6 @@
 
 const char* filename = "NewSimulationGebaeude1_AT_08.00.01 23.06.2015.EDX";
 
-TEST(FactorialTest, HandlesZeroInput) {
-	EXPECT_EQ(1, 1);
-}
-
 class EnvimetV4XmlParserTest : public ::testing::Test
 {
 protected:
@@ -46,6 +42,7 @@ TEST_F(EnvimetV4XmlParserTest, Parse)
 	EXPECT_EQ(1.0, parser->YSpacing->GetTuple1(0));
 	ASSERT_NEAR(164.84485, parser->ZSpacing->GetTuple1(parser->ZSpacing->GetNumberOfTuples() - 1), abs_error);
 
+	EXPECT_EQ(36, parser->VariableNames->GetNumberOfValues());
 	EXPECT_EQ("Objects ( )", parser->VariableNames->GetValue(0));
 	EXPECT_EQ("Div Rlw Temp change (K/h)", parser->VariableNames->GetValue(parser->VariableNames->GetNumberOfValues() - 1));
 

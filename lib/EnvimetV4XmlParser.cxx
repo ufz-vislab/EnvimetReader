@@ -59,6 +59,8 @@ int EnvimetV4XmlParser::Parse()
 	ZSpacing = StringToFloatArray(
 		root->LookupElementWithName("spacing_z")->GetCharacterData(), delim);
 
+	NumberOfVariables = StringToInt(
+		root->LookupElementWithName("nr_variables")->GetCharacterData());
 	VariableNames = StringToStringArray(
 		root->LookupElementWithName("name_variables")->GetCharacterData(), delim);
 
