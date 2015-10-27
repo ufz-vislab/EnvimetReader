@@ -48,6 +48,54 @@
 		 	</Hints>
 
 		</SourceProxy>
+		<SourceProxy name="InternalEnvimetV4XmlReader" class="EnvimetV4XmlReader" label="ENVI-met XML Reader">
+			<Documentation
+					long_help="Reads a ENVI-met XML-file."
+					short_help="Reads a ENVI-met XML-file.">
+				The ENVI-met reader reads a file pair of one EDX and one EDT file.
+				The standard extension is .EDX.
+			</Documentation>
+			<StringVectorProperty
+					name="FileName"
+					animateable="0"
+					command="SetFileName"
+					number_of_elements="1"
+					panel_visibility="never">
+				<FileListDomain name="files"/>
+				<Documentation>
+					This property specifies the file name for the reader.
+				</Documentation>
+			</StringVectorProperty>
+
+			<StringVectorProperty name="PointArrayInfo"
+								  information_only="1">
+				<ArraySelectionInformationHelper attribute_name="Point"/>
+			</StringVectorProperty>
+
+			<StringVectorProperty name="PointArrayStatus"
+								  command="SetPointArrayStatus"
+								  number_of_elements="0"
+								  repeat_command="1"
+								  number_of_elements_per_command="2"
+								  element_types="2 0"
+								  information_property="PointArrayInfo"
+								  label="Point Arrays">
+				<ArraySelectionDomain name="array_list">
+					<RequiredProperties>
+						<Property name="PointArrayInfo"
+								  function="ArrayList"/>
+					</RequiredProperties>
+				</ArraySelectionDomain>
+				<Documentation>
+					This property lists which point-centered arrays to read.
+				</Documentation>
+			</StringVectorProperty>
+
+			<Hints>
+				<ReaderFactory extensions="EDX" file_description="ENVI-met XML-file" />
+			</Hints>
+
+		</SourceProxy>
 	</ProxyGroup>
 
 	<ProxyGroup name="sources">
@@ -112,6 +160,69 @@
 
 			<Hints>
 				<ReaderFactory extensions="EDI" file_description="ENVI-met file" />
+			</Hints>
+		</SourceProxy>
+		<SourceProxy name="EnvimetV4XmlReader" label="ENVI-met XML Reader"
+					 class="vtkFileSeriesReader" si_class="vtkSIMetaReaderProxy"
+					 file_name_method="SetFileName">
+			<Documentation
+					long_help="Reads a ENVI-met file."
+					short_help="Reads a ENVI-met file.">
+				The ENVI-met reader reads a file pair of one EDI and one EDT file.
+				The standard extension is .EDX. This reader also supports file series.
+			</Documentation>
+
+			<SubProxy>
+				<Proxy name="Reader"
+					   proxygroup="internal_sources" proxyname="InternalEnvimetV4XmlReader">
+				</Proxy>
+				<ExposedProperties>
+					<PropertyGroup label="Cell/Point Array Status"
+								   name="CellPointArrayStatus"
+								   panel_visibility="default"
+								   panel_widget="ArrayStatus">
+						<Property name="PointArrayInfo" />
+						<Property name="PointArrayStatus" />
+					</PropertyGroup>
+				</ExposedProperties>
+			</SubProxy>
+
+			<StringVectorProperty name="FileNameInfo"
+								  command="GetCurrentFileName"
+								  information_only="1" >
+				<SimpleStringInformationHelper />
+			</StringVectorProperty>
+
+			<StringVectorProperty
+					name="FileName"
+					clean_command="RemoveAllFileNames"
+					command="AddFileName"
+					animateable="0"
+					information_property="FileNameInfo"
+					number_of_elements="1"
+					panel_visibility="never"
+					repeat_command="1">
+				<FileListDomain name="files"/>
+				<Documentation>
+					The list of files to be read by the reader. If more than 1 file is specified,
+					the reader will switch to file series mode in which it will pretend that it
+					can support time and provide 1 file per time step.
+				</Documentation>
+			</StringVectorProperty>
+
+			<DoubleVectorProperty
+					name="TimestepValues"
+					repeatable="1"
+					information_only="1">
+				<TimeStepsInformationHelper/>
+				<Documentation>
+					Available timestep values.
+				</Documentation>
+			</DoubleVectorProperty>
+
+
+			<Hints>
+				<ReaderFactory extensions="EDX" file_description="ENVI-met XML file" />
 			</Hints>
 		</SourceProxy>
 	</ProxyGroup>

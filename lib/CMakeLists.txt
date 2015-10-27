@@ -4,3 +4,4 @@ add_library(EnvimetReaderLib
 )
 
 target_link_libraries(EnvimetReaderLib INTERFACE vtkCommonCore vtkIOXMLParser)
+target_compile_features(EnvimetReaderLib PRIVATE cxx_auto_type)

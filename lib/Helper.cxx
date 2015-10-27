@@ -20,7 +20,7 @@ int Helper::CanReadFile(const char *name, const char *extension)
 	if(std::string(name).rfind(extension) == std::string::npos)
 	{
 		std::cout << "The file " <<name << " has the wrong extension. Expected: "
-			<< extension << std::cout;
+			<< extension << std::endl;
 		return 0;
 	}
 	else

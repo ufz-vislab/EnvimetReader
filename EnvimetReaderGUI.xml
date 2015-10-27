@@ -2,4 +2,7 @@
 	<Reader name="EnvimetReader" extensions="EDI"
 	        file_description="ENVI-met file">
 	</Reader>
+	<Reader name="EnvimetV4XmlReader" extensions="EDX"
+			file_description="ENVI-met XML-file">
+	</Reader>
 </ParaViewReaders>
