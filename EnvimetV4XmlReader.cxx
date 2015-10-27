@@ -75,7 +75,12 @@ int EnvimetV4XmlReader::RequestInformation(
 		return -1;
 
 	for(int i = 0; i < Parser->VariableNames->GetNumberOfTuples(); i++)
-		PointDataArraySelection->AddArray(Parser->VariableNames->GetValue(i));
+	{
+		std::string arrayName = Parser->VariableNames->GetValue(i);
+		arrayName.erase(remove_if(arrayName.begin(),arrayName.end(), Helper::invalidChar),
+						arrayName.end());
+		PointDataArraySelection->AddArray(arrayName.c_str());
+	}
 
 	std::cout << "Num arrays: " << PointDataArraySelection->GetNumberOfArrays() << std::endl;
 
