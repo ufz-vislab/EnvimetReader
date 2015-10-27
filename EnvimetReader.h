@@ -21,10 +21,6 @@ public:
 	vtkGetStringMacro(FileName);
 
 	// Description:
-	// Test whether the file with the given name can be read by this reader.
-	int CanReadFile(const char* name, const char* extension);
-
-	// Description:
 	// Get the data array selection tables used to configure which data
 	// arrays are loaded by the reader.
 	vtkGetObjectMacro(PointDataArraySelection, vtkDataArraySelection);

@@ -1,5 +1,7 @@
 #include "EnvimetReader.h"
 
+#include "lib/Helper.h"
+
 #include <vtkObjectFactory.h>
 #include <vtkStreamingDemandDrivenPipeline.h>
 #include <vtkInformationVector.h>
@@ -10,12 +12,6 @@
 #include <vtkFloatArray.h>
 #include <vtkDataArraySelection.h>
 #include <vtkCallbackCommand.h>
-
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sys/stat.h>
 
 vtkStandardNewMacro(EnvimetReader);
 
@@ -46,25 +42,6 @@ EnvimetReader::~EnvimetReader()
 	PointDataArraySelection->Delete();
 }
 
-int EnvimetReader::CanReadFile(const char *name, const char *extension)
-{
-	// Check if file exists
-	struct stat fs;
-	if (stat(name, &fs) != 0)
-	{
-		vtkErrorMacro(<< "The file " << name << " does not exist.")
-		return 0;
-	}
-
-	if(std::string(name).rfind(extension) == std::string::npos)
-	{
-		vtkErrorMacro(<< "The file " <<name << " has the wrong extension. Expected: " << extension);
-		return 0;
-	}
-	else
-		return 1;
-}
-
 bool invalidChar (char c)
 {
 	return !(c>=0 && c <128);
@@ -88,7 +65,7 @@ int EnvimetReader::RequestInformation(
 		return -1;
 	}
 
-	if(!CanReadFile(FileName, ".EDI"))
+	if(!Helper::CanReadFile(FileName, ".EDI"))
 		return -1;
 
 	std::ifstream in (FileName, std::ifstream::in);
@@ -196,7 +173,7 @@ int EnvimetReader::RequestData(
 	std::string asciiFileName = std::string(FileName);
 	std::string binaryFileName = asciiFileName.substr(0, asciiFileName.size() - 3).append("EDT");
 
-	if(!CanReadFile(binaryFileName.c_str(), ".EDT"))
+	if(!Helper::CanReadFile(binaryFileName.c_str(), ".EDT"))
 		return -1;
 
 	std::ifstream in (binaryFileName.c_str(), std::ifstream::in | std::ios::binary);
