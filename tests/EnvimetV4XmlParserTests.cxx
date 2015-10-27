@@ -44,6 +44,7 @@ TEST_F(EnvimetV4XmlParserTest, Parse)
 
 	EXPECT_EQ(36, parser->VariableNames->GetNumberOfValues());
 	EXPECT_EQ("Objects ( )", parser->VariableNames->GetValue(0));
+	EXPECT_EQ("Air Temperature (°C)", parser->VariableNames->GetValue(8));
 	EXPECT_EQ("Div Rlw Temp change (K/h)", parser->VariableNames->GetValue(parser->VariableNames->GetNumberOfValues() - 1));
 
 	EXPECT_EQ("NewSimulationGebaeude1_AT_", parser->SimulationBaseName);

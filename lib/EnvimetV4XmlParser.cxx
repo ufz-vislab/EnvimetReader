@@ -23,6 +23,9 @@ EnvimetV4XmlParser::EnvimetV4XmlParser() :
 	LocationGeorefY(0.0)
 {
 	Parser = vtkXMLDataParser::New();
+	// because files are in Windows 1252 encoding
+	// See https://en.wikipedia.org/wiki/Windows-1252
+	Parser->SetEncoding("iso-8859-1");
 	Parser->SetIgnoreCharacterData(0); // Enables reading of character data.
 }
 
@@ -37,6 +40,8 @@ int EnvimetV4XmlParser::Parse()
 		return -1;
 
 	Parser->SetFileName(FileName);
+	//Parser->SetAttributesEncoding(VTK_ENCODING_UNICODE);
+
 	if(Parser->Parse() != 1)
 		return -1;
 

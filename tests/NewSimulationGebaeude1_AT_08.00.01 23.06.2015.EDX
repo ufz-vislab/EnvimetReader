@@ -22,7 +22,7 @@
   <variables>
      <Data_per_variable> 1 </Data_per_variable>
      <nr_variables> 36 </nr_variables>
-     <name_variables> Objects ( ),Flow u (m/s),Flow v (m/s),Flow w (m/s),Wind Speed (m/s),Wind Speed Change (%),Wind Direction (deg),Pressure Perturbation (Diff),Air Temperature (ï¿½C),Air Temperature Delta (K),Air Temperature Change (K/h),Spec. Humidity (g/kg),Relative Humidity (%),TKE (mï¿½/mï¿½),Dissipation (mï¿½/mï¿½),Vertical Exchange Coef. Impuls (mï¿½/s),Horizontal Exchange Coef. Impuls (mï¿½/s),Vegetation LAD (mï¿½/mï¿½),Direct Sw Radiation (W/mï¿½),Diffuse Sw Radiation (W/mï¿½),Reflected Sw Radiation (W/mï¿½),Temperature Flux (K*m/s),Vapour Flux (g/kg*m/s),Water on Leafes (g/mï¿½),Leaf Temperature (ï¿½C),Local Mixing Length (m),Mean Radiant Temp. (ï¿½C),TKE normalised 1D ( ),Dissipation normalised 1D ( ),Km normalised 1D ( ),TKE Mechanical Turbulence Prod. ( ),Stomata Resistance (s/m),CO2 (mg/m3),CO2 (ppm),Plant CO2 Flux (mg/kg*m/s),Div Rlw Temp change (K/h) </name_variables>
+     <name_variables> Objects ( ),Flow u (m/s),Flow v (m/s),Flow w (m/s),Wind Speed (m/s),Wind Speed Change (%),Wind Direction (deg),Pressure Perturbation (Diff),Air Temperature (°C),Air Temperature Delta (K),Air Temperature Change (K/h),Spec. Humidity (g/kg),Relative Humidity (%),TKE (m²/m³),Dissipation (m³/m³),Vertical Exchange Coef. Impuls (m²/s),Horizontal Exchange Coef. Impuls (m²/s),Vegetation LAD (m²/m³),Direct Sw Radiation (W/m²),Diffuse Sw Radiation (W/m²),Reflected Sw Radiation (W/m²),Temperature Flux (K*m/s),Vapour Flux (g/kg*m/s),Water on Leafes (g/m²),Leaf Temperature (°C),Local Mixing Length (m),Mean Radiant Temp. (°C),TKE normalised 1D ( ),Dissipation normalised 1D ( ),Km normalised 1D ( ),TKE Mechanical Turbulence Prod. ( ),Stomata Resistance (s/m),CO2 (mg/m3),CO2 (ppm),Plant CO2 Flux (mg/kg*m/s),Div Rlw Temp change (K/h) </name_variables>
   </variables>
   <modeldescription>
      <title> Simulation ufz Gebaeude 1 08:00:01 23.06.2015 </title>
@@ -36,7 +36,7 @@
      <location_georef_y> 0.00000 </location_georef_y>
   </modeldescription>
   <envi-met_reference>
-     <envi-met_version> ENVI-metï¿½ V4.0 Public Preview I ï¿½ EMG Mainz and ENVI-met.com, Michael Bruse and Team, 1997-2014 </envi-met_version>
+     <envi-met_version> ENVI-met® V4.0 Public Preview I © EMG Mainz and ENVI-met.com, Michael Bruse and Team, 1997-2014 </envi-met_version>
      <envi-met_GUID> OEKUSSUSOZSCHL_14.08.2015_11.03.10 </envi-met_GUID>
      <licenseholder> ENVI-met User </licenseholder>
   </envi-met_reference>
