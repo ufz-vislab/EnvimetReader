@@ -8,6 +8,7 @@
 #include <vtkVariant.h>
 #include <vtkXMLDataParser.h>
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 

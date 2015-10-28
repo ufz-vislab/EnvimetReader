@@ -13,6 +13,8 @@
 #include <vtkDataArraySelection.h>
 #include <vtkCallbackCommand.h>
 
+#include <algorithm>
+
 vtkStandardNewMacro(EnvimetReader);
 
 EnvimetReader::EnvimetReader()
