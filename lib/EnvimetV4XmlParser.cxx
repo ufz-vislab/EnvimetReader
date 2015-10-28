@@ -112,8 +112,8 @@ vtkFloatArray* EnvimetV4XmlParser::StringToFloatArray(const char *string, const 
 	std::string s(string);
 	std::string delim(delimiter);
 
-	auto start = 0U;
-	auto end = s.find(delim);
+	unsigned int start = 0U;
+	std::string::size_type end = s.find(delim);
 	while(end != std::string::npos)
 	{
 		floatArray->InsertNextTuple1(StringToFloat((s.substr(start, end-start)).c_str()));
@@ -133,8 +133,8 @@ vtkStringArray* EnvimetV4XmlParser::StringToStringArray(const char *string, cons
 	std::string s(string);
 	std::string delim(delimiter);
 
-	auto start = 0U;
-	auto end = s.find(delim);
+	unsigned int start = 0U;
+	std::string::size_type end = s.find(delim);
 	while(end != std::string::npos)
 	{
 		array->InsertNextValue((Helper::trim(s.substr(start, end-start))).c_str());

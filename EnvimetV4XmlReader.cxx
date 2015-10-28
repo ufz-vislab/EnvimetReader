@@ -82,12 +82,6 @@ int EnvimetV4XmlReader::RequestInformation(
 		PointDataArraySelection->AddArray(arrayName.c_str());
 	}
 
-	std::cout << "Num arrays: " << PointDataArraySelection->GetNumberOfArrays() << std::endl;
-
-	if(PointDataArraySelection->GetNumberOfArrays() != Parser->VariableNames->GetNumberOfTuples())
-	vtkErrorMacro(<< "Mismatch of read data arrays (" << PointDataArraySelection->GetNumberOfArrays() <<
-					  ") to number of data arrays given in EDX-file(" << Parser->VariableNames->GetNumberOfValues() << ")");
-
 	XCoordinates->Reset();
 	XCoordinates->InsertNextValue(0.0f);
 	for(int i = 0; i < Parser->XDimension; i++)
