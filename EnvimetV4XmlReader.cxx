@@ -15,6 +15,8 @@
 #include <vtkDataArraySelection.h>
 #include <vtkCallbackCommand.h>
 
+#include <algorithm>
+
 vtkStandardNewMacro(EnvimetV4XmlReader);
 
 EnvimetV4XmlReader::EnvimetV4XmlReader()
@@ -77,7 +79,7 @@ int EnvimetV4XmlReader::RequestInformation(
 	for(int i = 0; i < Parser->VariableNames->GetNumberOfTuples(); i++)
 	{
 		std::string arrayName = Parser->VariableNames->GetValue(i);
-		arrayName.erase(remove_if(arrayName.begin(),arrayName.end(), Helper::invalidChar),
+		arrayName.erase(std::remove_if(arrayName.begin(),arrayName.end(), Helper::invalidChar),
 						arrayName.end());
 		PointDataArraySelection->AddArray(arrayName.c_str());
 	}

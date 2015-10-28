@@ -2,8 +2,9 @@ project(EnvimetReader CXX C)
 cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0022 NEW)
 cmake_policy(SET CMP0042 NEW)
+cmake_policy(SET CMP0054 NEW)
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-tautological-constant-out-of-range-compare")
 endif()
 
@@ -19,4 +20,6 @@ ADD_PARAVIEW_PLUGIN(EnvimetReader "1.2"
         )
 target_link_libraries(EnvimetReader PRIVATE EnvimetReaderLib)
 
-add_subdirectory(tests)
+if(BUILD_TESTING)
+	add_subdirectory(tests)
+endif()
