@@ -2,7 +2,10 @@ project(EnvimetReader CXX C)
 cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0022 NEW)
 cmake_policy(SET CMP0042 NEW)
-set(CXX_STANDARD 11)
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-tautological-constant-out-of-range-compare")
+endif()
 
 find_package(ParaView REQUIRED)
 include(${PARAVIEW_USE_FILE})
