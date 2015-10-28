@@ -1,10 +1,19 @@
+project(EnvimetReader CXX C)
 cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0022 NEW)
+cmake_policy(SET CMP0042 NEW)
+set(CXX_STANDARD 11)
 
 find_package(ParaView REQUIRED)
 include(${PARAVIEW_USE_FILE})
 
-ADD_PARAVIEW_PLUGIN(EnvimetReader "1.1"
-  SERVER_MANAGER_XML EnvimetReader.xml
-  SERVER_MANAGER_SOURCES EnvimetReader.cxx
-  REQUIRED_ON_SERVER
-)
+add_subdirectory(lib)
+
+ADD_PARAVIEW_PLUGIN(EnvimetReader "1.2"
+        SERVER_MANAGER_XML EnvimetReader.xml
+        SERVER_MANAGER_SOURCES EnvimetReader.cxx EnvimetV4XmlReader.cxx
+        REQUIRED_ON_SERVER
+        )
+target_link_libraries(EnvimetReader PRIVATE EnvimetReaderLib)
+
+add_subdirectory(tests)

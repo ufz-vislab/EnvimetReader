@@ -1,5 +1,6 @@
-#include "EnvimetReader.h"
+#include "EnvimetV4XmlReader.h"
 
+#include "lib/EnvimetV4XmlParser.h"
 #include "lib/Helper.h"
 
 #include <vtkObjectFactory.h>
@@ -10,13 +11,14 @@
 #include <vtkPointData.h>
 #include <vtkDataArray.h>
 #include <vtkFloatArray.h>
+#include <vtkStringArray.h>
 #include <vtkDataArraySelection.h>
 #include <vtkCallbackCommand.h>
 
-vtkStandardNewMacro(EnvimetReader);
+vtkStandardNewMacro(EnvimetV4XmlReader);
 
-EnvimetReader::EnvimetReader()
-: _infoFileRead(false)
+EnvimetV4XmlReader::EnvimetV4XmlReader()
+	: _infoFileRead(false)
 {
 	FileName = NULL;
 	NumberOfNestingCells = 12;
@@ -24,15 +26,17 @@ EnvimetReader::EnvimetReader()
 	SetNumberOfOutputPorts(1);
 	PointDataArraySelection = vtkDataArraySelection::New();
 	SelectionObserver = vtkCallbackCommand::New();
-	SelectionObserver->SetCallback(&EnvimetReader::SelectionModifiedCallback);
+	SelectionObserver->SetCallback(&EnvimetV4XmlReader::SelectionModifiedCallback);
 	SelectionObserver->SetClientData(this);
 	PointDataArraySelection->AddObserver(vtkCommand::ModifiedEvent, this->SelectionObserver);
 	XCoordinates = vtkFloatArray::New();
 	YCoordinates = vtkFloatArray::New();
 	ZCoordinates = vtkFloatArray::New();
+
+	Parser = EnvimetV4XmlParser::New();
 }
 
-EnvimetReader::~EnvimetReader()
+EnvimetV4XmlReader::~EnvimetV4XmlReader()
 {
 	XCoordinates->Delete();
 	YCoordinates->Delete();
@@ -40,9 +44,11 @@ EnvimetReader::~EnvimetReader()
 	PointDataArraySelection->RemoveObserver(this->SelectionObserver);
 	SelectionObserver->Delete();
 	PointDataArraySelection->Delete();
+
+	Parser->Delete();
 }
 
-int EnvimetReader::RequestInformation(
+int EnvimetV4XmlReader::RequestInformation(
 	vtkInformation *vtkNotUsed(request),
 	vtkInformationVector **vtkNotUsed(inputVector),
 	vtkInformationVector *outputVector)
@@ -50,6 +56,7 @@ int EnvimetReader::RequestInformation(
 
 	if(_infoFileRead)
 		return 1;
+
 
 	vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
@@ -60,75 +67,47 @@ int EnvimetReader::RequestInformation(
 		return -1;
 	}
 
-	if(!Helper::CanReadFile(FileName, ".EDI"))
+	if(!Helper::CanReadFile(FileName, ".EDX"))
 		return -1;
 
-	std::ifstream in (FileName, std::ifstream::in);
-	if(!in.is_open())
-	{
-		vtkErrorMacro(<< "File " << this->FileName << " could not be opened");
+	Parser->SetFileName(FileName);
+	if(Parser->Parse() != 1)
 		return -1;
-	}
-	std::string line;
-	std::getline(in, line);
-	// TODO "Waldstr 07:00:00 07.09.2013"
-	std::getline(in, line);
-	XDimension = atoi(line.c_str());
-	std::getline(in, line);
-	YDimension = atoi(line.c_str());
-	std::getline(in, line);
-	ZDimension = atoi(line.c_str());
-	std::getline(in, line);
-	const int numVars = atoi(line.c_str());
 
-	// Array names
-	while(line.find("Gridspacing") == std::string::npos)
+	for(int i = 0; i < Parser->VariableNames->GetNumberOfTuples(); i++)
 	{
-		std::getline(in, line);
-		std::replace(line.begin(), line.end(), '(', '-');                          // Replace braces
-		std::replace(line.begin(), line.end(), ')', ' ');                          // Replace braces
-		line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end()); // Remove whitespace
-		line.erase(remove_if(line.begin(),line.end(), Helper::invalidChar), line.end());   // Remove non-ascii chars
-		if(line.find("Gridspacing") == std::string::npos)
-			PointDataArraySelection->AddArray(line.c_str());
+		std::string arrayName = Parser->VariableNames->GetValue(i);
+		arrayName.erase(remove_if(arrayName.begin(),arrayName.end(), Helper::invalidChar),
+						arrayName.end());
+		PointDataArraySelection->AddArray(arrayName.c_str());
 	}
-	if(PointDataArraySelection->GetNumberOfArrays() != numVars)
-		vtkErrorMacro(<< "Mismatch of read data arrays (" << PointDataArraySelection->GetNumberOfArrays() <<
-			") to number of data arrays given in EDI-file line 5 (" << numVars << ")");
+
+	std::cout << "Num arrays: " << PointDataArraySelection->GetNumberOfArrays() << std::endl;
+
+	if(PointDataArraySelection->GetNumberOfArrays() != Parser->VariableNames->GetNumberOfTuples())
+	vtkErrorMacro(<< "Mismatch of read data arrays (" << PointDataArraySelection->GetNumberOfArrays() <<
+					  ") to number of data arrays given in EDX-file(" << Parser->VariableNames->GetNumberOfValues() << ")");
 
 	XCoordinates->Reset();
 	XCoordinates->InsertNextValue(0.0f);
-	for(int i = 0; i < XDimension; i++)
-	{
-		std::getline(in, line);
-		const float cellSize = atof(line.c_str());
-		XCoordinates->InsertNextValue(XCoordinates->GetValue(i) + cellSize);
-	}
+	for(int i = 0; i < Parser->XDimension; i++)
+		XCoordinates->InsertNextValue(XCoordinates->GetValue(i) + Parser->XSpacing->GetValue(i));
 
 	YCoordinates->Reset();
 	YCoordinates->InsertNextValue(0.0f);
-	for(int i = 0; i < YDimension; i++)
-	{
-		std::getline(in, line);
-		const float cellSize = atof(line.c_str());
-		YCoordinates->InsertNextValue(YCoordinates->GetValue(i) + cellSize);
-	}
+	for(int i = 0; i < Parser->YDimension; i++)
+		YCoordinates->InsertNextValue(YCoordinates->GetValue(i) + Parser->YSpacing->GetValue(i));
 
 	ZCoordinates->Reset();
 	ZCoordinates->InsertNextValue(0.0f);
-	for(int i = 0; i < ZDimension; i++)
-	{
-		std::getline(in, line);
-		const float cellSize = atof(line.c_str());
-		ZCoordinates->InsertNextValue(ZCoordinates->GetValue(i) + cellSize);
-	}
+	for(int i = 0; i < Parser->ZDimension; i++)
+		ZCoordinates->InsertNextValue(ZCoordinates->GetValue(i) + Parser->ZSpacing->GetValue(i));
 
-	in.close();
 	_infoFileRead = true;
 
-	int ext[6] = { NumberOfNestingCells, XDimension - NumberOfNestingCells - 1,
-	               NumberOfNestingCells, YDimension - NumberOfNestingCells - 1,
-	               0, ZDimension - 1 };
+	int ext[6] = { NumberOfNestingCells, Parser->XDimension - NumberOfNestingCells - 1,
+				   NumberOfNestingCells, Parser->YDimension - NumberOfNestingCells - 1,
+				   0, Parser->ZDimension - 1 };
 	double origin[3] = {0, 0, 0};
 
 	outInfo->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), ext, 6);
@@ -138,7 +117,7 @@ int EnvimetReader::RequestInformation(
 	return 1;
 }
 
-int EnvimetReader::RequestData(
+int EnvimetV4XmlReader::RequestData(
 	vtkInformation *vtkNotUsed(request),
 	vtkInformationVector **vtkNotUsed(inputVector),
 	vtkInformationVector *outputVector)
@@ -153,7 +132,7 @@ int EnvimetReader::RequestData(
 		outInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT()));
 
 	// Points
-	output->SetDimensions(XDimension, YDimension, ZDimension);
+	output->SetDimensions(Parser->XDimension, Parser->YDimension, Parser->ZDimension);
 
 	output->SetXCoordinates(XCoordinates);
 	output->SetYCoordinates(YCoordinates);
@@ -178,7 +157,7 @@ int EnvimetReader::RequestData(
 		return -1;
 	}
 
-	const vtkIdType numTuples = XDimension * YDimension * ZDimension;
+	const vtkIdType numTuples = Parser->XDimension * Parser->YDimension * Parser->ZDimension;
 	const int numArrays = PointDataArraySelection->GetNumberOfArraysEnabled();
 	int numArraysRead = 0;
 
@@ -186,7 +165,7 @@ int EnvimetReader::RequestData(
 	for(int arrayIndex = 0; arrayIndex < PointDataArraySelection->GetNumberOfArrays(); arrayIndex++)
 	{
 		if(PointDataArraySelection->GetArraySetting(arrayIndex) &&
-			!output->GetPointData()->HasArray(GetPointArrayName(arrayIndex)))
+		   !output->GetPointData()->HasArray(GetPointArrayName(arrayIndex)))
 		{
 			// Read into vtk array
 			float *floats = new float[numTuples];
@@ -214,27 +193,27 @@ int EnvimetReader::RequestData(
 	return 1;
 }
 
-void EnvimetReader::SelectionModifiedCallback(vtkObject*, unsigned long, void* clientdata, void*)
+void EnvimetV4XmlReader::SelectionModifiedCallback(vtkObject*, unsigned long, void* clientdata, void*)
 {
-	static_cast<EnvimetReader*>(clientdata)->Modified();
+	static_cast<EnvimetV4XmlReader*>(clientdata)->Modified();
 }
 
-int EnvimetReader::GetNumberOfPointArrays()
+int EnvimetV4XmlReader::GetNumberOfPointArrays()
 {
 	return PointDataArraySelection->GetNumberOfArrays();
 }
 
-const char * EnvimetReader::GetPointArrayName(int index)
+const char * EnvimetV4XmlReader::GetPointArrayName(int index)
 {
 	return PointDataArraySelection->GetArrayName(index);
 }
 
-int EnvimetReader::GetPointArrayStatus(const char *name)
+int EnvimetV4XmlReader::GetPointArrayStatus(const char *name)
 {
 	return PointDataArraySelection->ArrayIsEnabled(name);
 }
 
-void EnvimetReader::SetPointArrayStatus(const char *name, int status)
+void EnvimetV4XmlReader::SetPointArrayStatus(const char *name, int status)
 {
 	if(status)
 		PointDataArraySelection->EnableArray(name);
@@ -242,10 +221,10 @@ void EnvimetReader::SetPointArrayStatus(const char *name, int status)
 		PointDataArraySelection->DisableArray(name);
 }
 
-void EnvimetReader::PrintSelf(ostream& os, vtkIndent indent)
+void EnvimetV4XmlReader::PrintSelf(ostream& os, vtkIndent indent)
 {
 	Superclass::PrintSelf(os,indent);
 
 	os << indent << "File Name: "
-		<< (FileName ? FileName : "(none)") << "\n";
+	<< (FileName ? FileName : "(none)") << "\n";
 }

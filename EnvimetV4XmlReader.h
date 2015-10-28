@@ -1,19 +1,20 @@
-#ifndef __EnvimetReader_h
-#define __EnvimetReader_h
+#ifndef ENVIMETREADER_ENVIMETV4XMLREADER_H
+#define ENVIMETREADER_ENVIMETV4XMLREADER_H
 
 #include "vtkRectilinearGridAlgorithm.h"
 
 class vtkDataArraySelection;
 class vtkFloatArray;
 class vtkCallbackCommand;
+class EnvimetV4XmlParser;
 
-class EnvimetReader : public vtkRectilinearGridAlgorithm
+class EnvimetV4XmlReader : public vtkRectilinearGridAlgorithm
 {
 public:
-	vtkTypeMacro(EnvimetReader,vtkRectilinearGridAlgorithm);
+	vtkTypeMacro(EnvimetV4XmlReader,vtkRectilinearGridAlgorithm);
 	void PrintSelf(ostream& os, vtkIndent indent);
 
-	static EnvimetReader *New();
+	static EnvimetV4XmlReader *New();
 
 	// Description:
 	// Specify file name of the .abc file.
@@ -39,15 +40,15 @@ public:
 	void SetPointArrayStatus(const char *name, int status);
 
 protected:
-	EnvimetReader();
-	~EnvimetReader();
+	EnvimetV4XmlReader();
+	~EnvimetV4XmlReader();
 
 	int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 	int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
 	// Callback registered with the SelectionObserver.
 	static void SelectionModifiedCallback(vtkObject* caller, unsigned long eid,
-		void* clientdata, void* calldata);
+										  void* clientdata, void* calldata);
 
 	// The input file's name.
 	char* FileName;
@@ -66,16 +67,13 @@ protected:
 	vtkFloatArray *YCoordinates;
 	vtkFloatArray *ZCoordinates;
 
-	// The number of cells in each dimension.
-	int XDimension;
-	int YDimension;
-	int ZDimension;
+	EnvimetV4XmlParser *Parser;
 
 private:
-	EnvimetReader(const EnvimetReader&);  // Not implemented.
-	void operator=(const EnvimetReader&);  // Not implemented.
+	EnvimetV4XmlReader(const EnvimetV4XmlReader&);  // Not implemented.
+	void operator=(const EnvimetV4XmlReader&);  // Not implemented.
 
 	bool _infoFileRead;
 };
 
-#endif
+#endif //ENVIMETREADER_ENVIMETV4XMLREADER_H
