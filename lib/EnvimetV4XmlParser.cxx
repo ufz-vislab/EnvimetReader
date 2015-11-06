@@ -89,7 +89,7 @@ int EnvimetV4XmlParser::Parse()
 	std::cout << FileName << std::endl;
 	std::string SimulationDirectory = Helper::getDirectory(FileName);
 	std::string NestingFileName = SimulationDirectory + SimulationBaseName + "nesting.txt";
-	std::ifstream in (NestingFileName, std::ifstream::in);
+	std::ifstream in (NestingFileName.c_str(), std::ifstream::in);
 	if(in.is_open())
 	{
 		std::string line;

@@ -131,7 +131,7 @@ int EnvimetReader::RequestInformation(
 	const std::size_t pos = std::string(FileName).find_last_of("_");
 	std::string SimulationDirectoryBaseName = std::string(FileName).substr(0, pos + 1);
 	std::string NestingFileName = SimulationDirectoryBaseName + "nesting.txt";
-	std::ifstream nesting (NestingFileName, std::ifstream::in);
+	std::ifstream nesting (NestingFileName.c_str(), std::ifstream::in);
 	if(nesting.is_open())
 	{
 		std::string line;
