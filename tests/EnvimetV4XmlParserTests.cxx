@@ -33,6 +33,7 @@ TEST_F(EnvimetV4XmlParserTest, Parse)
 	EXPECT_EQ(100, parser->XDimension);
 	EXPECT_EQ(100, parser->YDimension);
 	EXPECT_EQ(30, parser->ZDimension);
+	EXPECT_EQ(2, parser->NumberOfNestingCells);
 
 	EXPECT_EQ(parser->XDimension, parser->XSpacing->GetNumberOfTuples());
 	EXPECT_EQ(parser->YDimension, parser->YSpacing->GetNumberOfTuples());

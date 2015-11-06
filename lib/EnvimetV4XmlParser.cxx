@@ -21,7 +21,8 @@ EnvimetV4XmlParser::EnvimetV4XmlParser() :
 	ZDimension(2),
 	ModelRotation(0.0f),
 	LocationGeorefX(0.0),
-	LocationGeorefY(0.0)
+	LocationGeorefY(0.0),
+	NumberOfNestingCells(0)
 {
 	Parser = vtkXMLDataParser::New();
 	// because files are in Windows 1252 encoding
@@ -47,14 +48,14 @@ int EnvimetV4XmlParser::Parse()
 		return -1;
 
 	vtkXMLDataElement *root = Parser->GetRootElement();
-	NumberOfSpatialDimensions = StringToInt(
+	NumberOfSpatialDimensions = Helper::StringToInt(
 		root->LookupElementWithName("data_spatial_dim")->GetCharacterData());
-	XDimension = StringToInt(
+	XDimension = Helper::StringToInt(
 		root->LookupElementWithName("nr_xdata")->GetCharacterData());
-	YDimension = StringToInt(
+	YDimension = Helper::StringToInt(
 		root->LookupElementWithName("nr_ydata")->GetCharacterData());
 	if(NumberOfSpatialDimensions > 2)
-		ZDimension = StringToInt(
+		ZDimension = Helper::StringToInt(
 			root->LookupElementWithName("nr_zdata")->GetCharacterData());
 
 	const char *delim = ",";
@@ -65,7 +66,7 @@ int EnvimetV4XmlParser::Parse()
 	ZSpacing = StringToFloatArray(
 		root->LookupElementWithName("spacing_z")->GetCharacterData(), delim);
 
-	NumberOfVariables = StringToInt(
+	NumberOfVariables = Helper::StringToInt(
 		root->LookupElementWithName("nr_variables")->GetCharacterData());
 	VariableNames = StringToStringArray(
 		root->LookupElementWithName("name_variables")->GetCharacterData(), delim);
@@ -85,13 +86,19 @@ int EnvimetV4XmlParser::Parse()
 	LocationGeorefY = StringToDouble(
 		root->LookupElementWithName("location_georef_y")->GetCharacterData());
 
-	return 1;
-}
+	std::cout << FileName << std::endl;
+	std::string SimulationDirectory = Helper::getDirectory(FileName);
+	std::string NestingFileName = SimulationDirectory + SimulationBaseName + "nesting.txt";
+	std::ifstream in (NestingFileName, std::ifstream::in);
+	if(in.is_open())
+	{
+		std::string line;
+		std::getline(in, line);
+		NumberOfNestingCells = Helper::StringToInt(line.c_str());
+		in.close();
+	}
 
-int EnvimetV4XmlParser::StringToInt(const char *string)
-{
-	vtkVariant variant(string);
-	return variant.ToInt();
+	return 1;
 }
 
 float EnvimetV4XmlParser::StringToFloat(const char *string)

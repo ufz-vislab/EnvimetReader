@@ -99,6 +99,8 @@ int EnvimetV4XmlReader::RequestInformation(
 	for(int i = 0; i < Parser->ZDimension; i++)
 		ZCoordinates->InsertNextValue(ZCoordinates->GetValue(i) + Parser->ZSpacing->GetValue(i));
 
+	NumberOfNestingCells = Parser->NumberOfNestingCells;
+
 	_infoFileRead = true;
 
 	int ext[6] = { NumberOfNestingCells, Parser->XDimension - NumberOfNestingCells - 1,

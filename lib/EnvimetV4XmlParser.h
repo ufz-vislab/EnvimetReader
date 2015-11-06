@@ -49,6 +49,7 @@ public:
 	// Envimet reference
 
 	// Additional info
+	int NumberOfNestingCells;
 protected:
 	EnvimetV4XmlParser();
 	~EnvimetV4XmlParser();
@@ -59,7 +60,6 @@ private:
 	EnvimetV4XmlParser(const EnvimetV4XmlParser&);  // Not implemented.
 	void operator=(const EnvimetV4XmlParser&);  // Not implemented.
 
-	int StringToInt(const char *string);
 	float StringToFloat(const char *string);
 	double StringToDouble(const char *string);
 	vtkFloatArray* StringToFloatArray(const char *string, const char *delimiter);

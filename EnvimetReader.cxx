@@ -128,6 +128,18 @@ int EnvimetReader::RequestInformation(
 	in.close();
 	_infoFileRead = true;
 
+	const std::size_t pos = std::string(FileName).find_last_of("_");
+	std::string SimulationDirectoryBaseName = std::string(FileName).substr(0, pos + 1);
+	std::string NestingFileName = SimulationDirectoryBaseName + "nesting.txt";
+	std::ifstream nesting (NestingFileName, std::ifstream::in);
+	if(nesting.is_open())
+	{
+		std::string line;
+		std::getline(nesting, line);
+		NumberOfNestingCells = Helper::StringToInt(line.c_str());
+		nesting.close();
+	}
+
 	int ext[6] = { NumberOfNestingCells, XDimension - NumberOfNestingCells - 1,
 	               NumberOfNestingCells, YDimension - NumberOfNestingCells - 1,
 	               0, ZDimension - 1 };

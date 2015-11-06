@@ -6,6 +6,7 @@
 #define PROJECT_HELPER_H
 
 #include <string>
+#include <vtkVariant.h>
 
 class Helper
 {
@@ -52,6 +53,25 @@ public:
 		}
 
 		return result;
+	}
+
+	static std::string getDirectory(const std::string& str)
+	{
+#if WIN32
+		std::string separator = "\\";
+#else
+		std::string separator = "/";
+#endif
+		const std::size_t pos = str.find_last_of("/\\");
+		if(pos == std::string::npos)
+			return "." + separator;
+		return str.substr(0, pos + 1);
+	}
+
+	static int StringToInt(const char *string)
+	{
+		vtkVariant variant(string);
+		return variant.ToInt();
 	}
 };
 
