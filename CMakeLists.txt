@@ -15,7 +15,7 @@ include(${PARAVIEW_USE_FILE})
 
 add_subdirectory(lib)
 
-ADD_PARAVIEW_PLUGIN(EnvimetReader "1.2"
+ADD_PARAVIEW_PLUGIN(EnvimetReader "1.2.1"
         SERVER_MANAGER_XML EnvimetReader.xml
         SERVER_MANAGER_SOURCES EnvimetReader.cxx EnvimetV4XmlReader.cxx
         REQUIRED_ON_SERVER
