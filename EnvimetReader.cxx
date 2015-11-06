@@ -21,7 +21,7 @@ EnvimetReader::EnvimetReader()
 : _infoFileRead(false)
 {
 	FileName = NULL;
-	NumberOfNestingCells = 12;
+	NumberOfNestingCells = 0;
 	SetNumberOfInputPorts(0);
 	SetNumberOfOutputPorts(1);
 	PointDataArraySelection = vtkDataArraySelection::New();
