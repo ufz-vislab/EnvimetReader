@@ -1,17 +1,17 @@
+cmake_minimum_required(VERSION 3.3)
+project(EnvimetReader)
+
 option(BUILD_TESTING "Build tests")
 
-project(EnvimetReader CXX C)
-cmake_minimum_required(VERSION 2.8)
-cmake_policy(SET CMP0022 NEW)
-cmake_policy(SET CMP0042 NEW)
-cmake_policy(SET CMP0054 NEW)
-
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-tautological-constant-out-of-range-compare")
+# Find
+if(ParaView_SOURCE_DIR)
+  #building within the ParaView source tree
+  include_directories(${VTK_INCLUDE_DIRS})
+else()
+  #building outside of the source tree
+  find_package(ParaView REQUIRED)
+  include(${PARAVIEW_USE_FILE})
 endif()
-
-find_package(ParaView REQUIRED)
-include(${PARAVIEW_USE_FILE})
 
 add_subdirectory(lib)
 

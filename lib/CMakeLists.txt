@@ -1,4 +1,4 @@
-add_library(EnvimetReaderLib
+add_library(EnvimetReaderLib STATIC
     Helper.cxx
     EnvimetV4XmlParser.cxx
 )

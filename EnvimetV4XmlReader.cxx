@@ -103,8 +103,8 @@ int EnvimetV4XmlReader::RequestInformation(
 
 	_infoFileRead = true;
 
-	int ext[6] = { NumberOfNestingCells, Parser->XDimension - NumberOfNestingCells - 1,
-				   NumberOfNestingCells, Parser->YDimension - NumberOfNestingCells - 1,
+	int ext[6] = { (int)NumberOfNestingCells, Parser->XDimension - (int)NumberOfNestingCells - 1,
+				   (int)NumberOfNestingCells, Parser->YDimension - (int)NumberOfNestingCells - 1,
 				   0, Parser->ZDimension - 1 };
 	double origin[3] = {0, 0, 0};
 

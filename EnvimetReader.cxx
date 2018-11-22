@@ -140,8 +140,8 @@ int EnvimetReader::RequestInformation(
 		nesting.close();
 	}
 
-	int ext[6] = { NumberOfNestingCells, XDimension - NumberOfNestingCells - 1,
-	               NumberOfNestingCells, YDimension - NumberOfNestingCells - 1,
+	int ext[6] = { (int)NumberOfNestingCells, XDimension - (int)NumberOfNestingCells - 1,
+	               (int)NumberOfNestingCells, YDimension - (int)NumberOfNestingCells - 1,
 	               0, ZDimension - 1 };
 	double origin[3] = {0, 0, 0};
 
